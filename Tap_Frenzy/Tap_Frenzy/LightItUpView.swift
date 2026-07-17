@@ -57,15 +57,15 @@ struct LightItUpView: View {
             .padding(.top, 50)
         }
     }
-        private func handleCardTap(_ index: Int) {
-            if index == activeCard {
-                score += 1
-                activeCard = Int.random(in: 0..<9)
-            }
+    private func handleCardTap(_ index: Int) {
+        if index == activeCard {
+            score += 1
+            activeCard = Int.random(in: 0..<9)
+        } else {
+            score = max(0, score - 1)
         }
-        
     }
-
+            }
 
 #Preview {
     LightItUpView()
