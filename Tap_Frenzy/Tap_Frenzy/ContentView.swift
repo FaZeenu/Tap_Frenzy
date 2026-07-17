@@ -4,6 +4,7 @@ import Combine
 struct ContentView: View {
     @State private var score = 0
     @State private var timeRemaining = 10
+    @State private var highScore = 0
     
     let timer = Timer.publish(
         every: 1,
@@ -26,6 +27,10 @@ struct ContentView: View {
                     .font(.title2)
                     .foregroundStyle(.white)
 
+                Text("High Score: \(highScore)")
+                    .font(.headline)
+                    .foregroundStyle(.white)
+                
                 Text("Score: \(score)")
                     .font(.title)
                     .fontWeight(.semibold)
@@ -71,6 +76,9 @@ struct ContentView: View {
             if timeRemaining > 0 {
                 timeRemaining -= 1
             }
+            if timeRemaining == 0 && score > highScore {
+                    highScore = score
+                }
         }
     }
 }
