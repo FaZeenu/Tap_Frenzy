@@ -1,6 +1,7 @@
 import SwiftUI
 
 struct LightItUpView: View {
+    @State private var activeCard = 0
     
     let columns = [
         GridItem(.flexible()),
@@ -29,14 +30,30 @@ struct LightItUpView: View {
                     .foregroundStyle(.white)
                 
                 LazyVGrid(columns: columns, spacing: 15) {
-                    ForEach(0..<9, id: \.self) { _ in
+                    ForEach(0..<9, id: \.self) { index in
                         RoundedRectangle(cornerRadius: 15)
-                            .fill(Color.gray)
+                            .fill(
+                                index == activeCard
+                                ? Color.yellow
+                                : Color.gray
+                            )
+                        
+                        
                             .frame(height: 100)
                     }
                 }
                 .padding()
-
+                
+                Button("Change Light") {
+                    activeCard = Int.random(in: 0..<9)
+                }
+                .font(.title2)
+                .fontWeight(.bold)
+                .foregroundStyle(.black)
+                .padding()
+                .background(Color.yellow)
+                .clipShape(RoundedRectangle(cornerRadius: 12))
+                
                 Spacer()
                 
             }
