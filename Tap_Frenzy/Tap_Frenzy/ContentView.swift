@@ -54,7 +54,7 @@ struct ContentView: View {
                             .font(.system(size: 40, weight: .bold))
                             .foregroundStyle(.white)
                             .frame(width: buttonSize, height: buttonSize)
-                            .background(Color.white)
+                            .background(isBonusColour ? Color.green : Color.gray)
                             .clipShape(Circle())
                             .shadow(radius: 10)
                     }
@@ -71,12 +71,13 @@ struct ContentView: View {
                     Button("Play Again") {
                         score = 0
                         timeRemaining = 10
+                        isBonusColour = true
                     }
                     .font(.title2)
                     .fontWeight(.bold)
                     .foregroundStyle(.blue)
                     .padding()
-                    .background(isBonusColour ? Color.green : Color.gray)
+                    .background(Color.white)
                     .clipShape(RoundedRectangle(cornerRadius: 12))
                 }
             }
@@ -97,3 +98,4 @@ struct ContentView: View {
 #Preview {
     ContentView()
 }
+
