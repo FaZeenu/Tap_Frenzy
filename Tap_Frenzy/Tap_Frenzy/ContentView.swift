@@ -1,6 +1,16 @@
 import SwiftUI
+import Combine
 
 struct ContentView: View {
+    @State private var score = 0
+    @State private var timeRemaining = 10
+    
+    let timer = Timer.publish(
+        every: 1,
+        on: .main,
+        in: .common
+    ).autoconnect()
+    
     var body: some View {
         ZStack {
             Color.blue
@@ -12,16 +22,17 @@ struct ContentView: View {
                     .fontWeight(.bold)
                     .foregroundStyle(.white)
 
-                Text("Time: 10")
+                Text("Time: \(timeRemaining)")
                     .font(.title2)
                     .foregroundStyle(.white)
 
-                Text("Score: 0")
+                Text("Score: \(score)")
                     .font(.title)
                     .fontWeight(.semibold)
                     .foregroundStyle(.white)
 
                 Button {
+                    score += 1
                 } label: {
                     Text("TAP!")
                         .font(.system(size: 40, weight: .bold))
@@ -33,6 +44,11 @@ struct ContentView: View {
                 }
             }
             .padding()
+        }
+        .onReceive(timer) { _ in
+            if timeRemaining > 0 {
+                timeRemaining -= 1
+            }
         }
     }
 }
