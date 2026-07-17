@@ -5,6 +5,7 @@ struct ContentView: View {
     @State private var score = 0
     @State private var timeRemaining = 10
     @State private var highScore = 0
+    @State private var isBonusColour = true
     
     let timer = Timer.publish(
         every: 1,
@@ -42,11 +43,16 @@ struct ContentView: View {
 
                 if timeRemaining > 0 {
                     Button {
-                        score += 1
+                        if isBonusColour {
+                            score += 2
+                        } else {
+                            score = max(0, score - 1)
+                        }
                     } label: {
+                        
                         Text("TAP!")
                             .font(.system(size: 40, weight: .bold))
-                            .foregroundStyle(.blue)
+                            .foregroundStyle(.white)
                             .frame(width: buttonSize, height: buttonSize)
                             .background(Color.white)
                             .clipShape(Circle())
@@ -70,7 +76,7 @@ struct ContentView: View {
                     .fontWeight(.bold)
                     .foregroundStyle(.blue)
                     .padding()
-                    .background(Color.white)
+                    .background(isBonusColour ? Color.green : Color.gray)
                     .clipShape(RoundedRectangle(cornerRadius: 12))
                 }
             }
@@ -79,6 +85,7 @@ struct ContentView: View {
         .onReceive(timer) { _ in
             if timeRemaining > 0 {
                 timeRemaining -= 1
+                isBonusColour.toggle()
             }
             if timeRemaining == 0 && score > highScore {
                     highScore = score
