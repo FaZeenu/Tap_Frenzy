@@ -31,16 +31,38 @@ struct ContentView: View {
                     .fontWeight(.semibold)
                     .foregroundStyle(.white)
 
-                Button {
-                    score += 1
-                } label: {
-                    Text("TAP!")
-                        .font(.system(size: 40, weight: .bold))
-                        .foregroundStyle(.blue)
-                        .frame(width: 220, height: 220)
-                        .background(Color.white)
-                        .clipShape(Circle())
-                        .shadow(radius: 10)
+                if timeRemaining > 0 {
+                    Button {
+                        score += 1
+                    } label: {
+                        Text("TAP!")
+                            .font(.system(size: 40, weight: .bold))
+                            .foregroundStyle(.blue)
+                            .frame(width: 220, height: 220)
+                            .background(Color.white)
+                            .clipShape(Circle())
+                            .shadow(radius: 10)
+                    }
+                } else {
+                    Text("Game Over!")
+                        .font(.largeTitle)
+                        .fontWeight(.bold)
+                        .foregroundStyle(.yellow)
+
+                    Text("Final Score: \(score)")
+                        .font(.title2)
+                        .foregroundStyle(.white)
+
+                    Button("Play Again") {
+                        score = 0
+                        timeRemaining = 10
+                    }
+                    .font(.title2)
+                    .fontWeight(.bold)
+                    .foregroundStyle(.blue)
+                    .padding()
+                    .background(Color.white)
+                    .clipShape(RoundedRectangle(cornerRadius: 12))
                 }
             }
             .padding()
