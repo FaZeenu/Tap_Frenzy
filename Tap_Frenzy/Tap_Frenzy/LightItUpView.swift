@@ -1,8 +1,17 @@
 import SwiftUI
+import Combine
 
 struct LightItUpView: View {
     @State private var activeCard = 0
     @State private var score = 0
+    @State private var timeRemaining = 30
+    @State private var gameOver = false
+    
+    let timer = Timer.publish(
+        every: 1,
+        on: .main,
+        in: .common
+    ).autoconnect()
     
     
     let columns = [
@@ -27,7 +36,7 @@ struct LightItUpView: View {
                     .font(.title2)
                     .foregroundStyle(.white)
                 
-                Text("Time: 30")
+                Text("Time: \(timeRemaining)")
                     .font(.title2)
                     .foregroundStyle(.white)
                 
@@ -55,9 +64,21 @@ struct LightItUpView: View {
                 
             }
             .padding(.top, 50)
+            
+            .onReceive(timer) { _ in
+                if timeRemaining > 0 {
+                    timeRemaining -= 1
+                } else {
+                    gameOver = true
+                }
+            }
         }
     }
+    
     private func handleCardTap(_ index: Int) {
+        guard !gameOver else {
+            return
+        }
         if index == activeCard {
             score += 1
             activeCard = Int.random(in: 0..<9)
