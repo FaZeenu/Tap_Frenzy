@@ -12,6 +12,10 @@ struct ContentView: View {
         in: .common
     ).autoconnect()
     
+    var buttonSize: CGFloat {
+        CGFloat(120 + timeRemaining * 10)
+    }
+    
     var body: some View {
         ZStack {
             Color.blue
@@ -43,7 +47,7 @@ struct ContentView: View {
                         Text("TAP!")
                             .font(.system(size: 40, weight: .bold))
                             .foregroundStyle(.blue)
-                            .frame(width: 220, height: 220)
+                            .frame(width: buttonSize, height: buttonSize)
                             .background(Color.white)
                             .clipShape(Circle())
                             .shadow(radius: 10)
