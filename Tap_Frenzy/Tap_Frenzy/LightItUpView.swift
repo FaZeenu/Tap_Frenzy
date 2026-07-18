@@ -77,6 +77,9 @@ struct LightItUpView: View {
                 gameOver = true
             }
         }
+        .onAppear {
+            startCardTimer()
+        }
     }
     
     private func handleCardTap(_ index: Int) {
@@ -86,11 +89,29 @@ struct LightItUpView: View {
         if index == activeCard {
             score += 1
             activeCard = Int.random(in: 0..<9)
+            startCardTimer()
         } else {
             score = max(0, score - 1)
         }
         
     }
+    
+    private func startCardTimer() {
+        let currentCard = activeCard
+
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+            guard !gameOver else {
+                return
+            }
+
+            if activeCard == currentCard {
+                score = max(0, score - 1)
+                activeCard = Int.random(in: 0..<9)
+                startCardTimer()
+            }
+        }
+    }
+    
     private var gameOverView: some View {
         VStack(spacing: 25) {
             
@@ -120,6 +141,7 @@ struct LightItUpView: View {
         timeRemaining = 30
         gameOver = false
         activeCard = Int.random(in: 0..<9)
+        startCardTimer()
     }
 
 }
