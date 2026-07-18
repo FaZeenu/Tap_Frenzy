@@ -6,6 +6,8 @@ struct LightItUpView: View {
     @State private var score = 0
     @State private var timeRemaining = 30
     @State private var gameOver = false
+    @State private var level = 1
+    @State private var cardTimerToken = UUID()
     
     let timer = Timer.publish(
         every: 1,
@@ -14,11 +16,38 @@ struct LightItUpView: View {
     ).autoconnect()
     
     
-    let columns = [
-        GridItem(.flexible()),
-        GridItem(.flexible()),
-        GridItem(.flexible())
-    ]
+    private var gridSize: Int {
+        switch level {
+        case 1:
+            return 2
+        case 2:
+            return 3
+        default:
+            return 4
+        }
+    }
+
+    private var cardCount: Int {
+        gridSize * gridSize
+    }
+
+    private var columns: [GridItem] {
+        Array(
+            repeating: GridItem(.flexible()),
+            count: gridSize
+        )
+    }
+
+    private var lightDuration: Double {
+        switch level {
+        case 1:
+            return 1.5
+        case 2:
+            return 1.0
+        default:
+            return 0.7
+        }
+    }
     
     var body: some View {
         ZStack {
@@ -43,9 +72,13 @@ struct LightItUpView: View {
                         .font(.title2)
                         .foregroundStyle(.white)
                     
+                    Text("Level: \(level)")
+                        .font(.title2)
+                        .foregroundStyle(.yellow)
+                    
                     LazyVGrid(columns: columns, spacing: 15) {
                         
-                        ForEach(0..<9, id: \.self) { index in
+                        ForEach(0..<cardCount, id: \.self) { index in
                             
                             Button {
                                 handleCardTap(index)
@@ -73,6 +106,7 @@ struct LightItUpView: View {
         .onReceive(timer) { _ in
             if timeRemaining > 0 {
                 timeRemaining -= 1
+                updateLevel()
             } else {
                 gameOver = true
             }
@@ -88,7 +122,7 @@ struct LightItUpView: View {
         }
         if index == activeCard {
             score += 1
-            activeCard = Int.random(in: 0..<9)
+            activeCard = Int.random(in: 0..<cardCount)
             startCardTimer()
         } else {
             score = max(0, score - 1)
@@ -98,20 +132,42 @@ struct LightItUpView: View {
     
     private func startCardTimer() {
         let currentCard = activeCard
+        let currentToken = UUID()
 
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
-            guard !gameOver else {
+        cardTimerToken = currentToken
+
+        DispatchQueue.main.asyncAfter(
+            deadline: .now() + lightDuration
+        ) {
+            guard !gameOver,
+                  cardTimerToken == currentToken else {
                 return
             }
 
             if activeCard == currentCard {
                 score = max(0, score - 1)
-                activeCard = Int.random(in: 0..<9)
+                activeCard = Int.random(in: 0..<cardCount)
                 startCardTimer()
             }
         }
     }
-    
+    private func updateLevel() {
+        let newLevel: Int
+
+        if timeRemaining > 20 {
+            newLevel = 1
+        } else if timeRemaining > 10 {
+            newLevel = 2
+        } else {
+            newLevel = 3
+        }
+
+        if newLevel != level {
+            level = newLevel
+            activeCard = Int.random(in: 0..<cardCount)
+            startCardTimer()
+        }
+    }
     private var gameOverView: some View {
         VStack(spacing: 25) {
             
@@ -140,7 +196,8 @@ struct LightItUpView: View {
         score = 0
         timeRemaining = 30
         gameOver = false
-        activeCard = Int.random(in: 0..<9)
+        level = 1
+        activeCard = Int.random(in: 0..<cardCount)
         startCardTimer()
     }
 
