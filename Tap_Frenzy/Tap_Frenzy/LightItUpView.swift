@@ -25,52 +25,56 @@ struct LightItUpView: View {
             Color.black
                 .ignoresSafeArea()
             
-            VStack(spacing: 30) {
-                
-                Text("Light It Up")
-                    .font(.largeTitle)
-                    .fontWeight(.bold)
-                    .foregroundStyle(.white)
-                
-                Text("Score: \(score)")
-                    .font(.title2)
-                    .foregroundStyle(.white)
-                
-                Text("Time: \(timeRemaining)")
-                    .font(.title2)
-                    .foregroundStyle(.white)
-                
-                LazyVGrid(columns: columns, spacing: 15) {
+            if gameOver {
+                gameOverView
+            } else {
+                VStack(spacing: 30) {
                     
-                    ForEach(0..<9, id: \.self) { index in
+                    Text("Light It Up")
+                        .font(.largeTitle)
+                        .fontWeight(.bold)
+                        .foregroundStyle(.white)
+                    
+                    Text("Score: \(score)")
+                        .font(.title2)
+                        .foregroundStyle(.white)
+                    
+                    Text("Time: \(timeRemaining)")
+                        .font(.title2)
+                        .foregroundStyle(.white)
+                    
+                    LazyVGrid(columns: columns, spacing: 15) {
                         
-                        Button {
-                            handleCardTap(index)
-                        } label: {
-                            RoundedRectangle(cornerRadius: 15)
-                                .fill(
-                                    index == activeCard
-                                    ? Color.yellow
-                                    : Color.gray
-                                )
-                                .frame(height: 100)
+                        ForEach(0..<9, id: \.self) { index in
+                            
+                            Button {
+                                handleCardTap(index)
+                            } label: {
+                                RoundedRectangle(cornerRadius: 15)
+                                    .fill(
+                                        index == activeCard
+                                        ? Color.yellow
+                                        : Color.gray
+                                    )
+                                    .frame(height: 100)
+                            }
+                            .buttonStyle(.plain)
                         }
-                        .buttonStyle(.plain)
                     }
+                    .padding()
+                    
+                    Spacer()
+                    
                 }
-                .padding()
-            
-                Spacer()
                 
+                .padding(.top, 50)
             }
-            .padding(.top, 50)
-            
-            .onReceive(timer) { _ in
-                if timeRemaining > 0 {
-                    timeRemaining -= 1
-                } else {
-                    gameOver = true
-                }
+        }
+        .onReceive(timer) { _ in
+            if timeRemaining > 0 {
+                timeRemaining -= 1
+            } else {
+                gameOver = true
             }
         }
     }
@@ -85,8 +89,40 @@ struct LightItUpView: View {
         } else {
             score = max(0, score - 1)
         }
+        
     }
+    private var gameOverView: some View {
+        VStack(spacing: 25) {
+            
+            Text("Game Over!")
+                .font(.largeTitle)
+                .fontWeight(.bold)
+                .foregroundStyle(.yellow)
+            
+            Text("Final Score: \(score)")
+                .font(.title2)
+                .foregroundStyle(.white)
+            
+            Button("Play Again") {
+                restartGame()
             }
+            .font(.title2)
+            .fontWeight(.bold)
+            .foregroundStyle(.black)
+            .padding()
+            .background(Color.yellow)
+            .clipShape(RoundedRectangle(cornerRadius: 12))
+        }
+    }
+    
+    private func restartGame() {
+        score = 0
+        timeRemaining = 30
+        gameOver = false
+        activeCard = Int.random(in: 0..<9)
+    }
+
+}
 
 #Preview {
     LightItUpView()
