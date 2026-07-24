@@ -8,6 +8,9 @@ struct LightItUpView: View {
     @State private var gameOver = false
     @State private var level = 1
     @State private var cardTimerToken = UUID()
+    @AppStorage("lightItUpHighScore")
+    
+    private var highScore = 0
     
     let timer = Timer.publish(
         every: 1,
@@ -68,6 +71,10 @@ struct LightItUpView: View {
                         .font(.title2)
                         .foregroundStyle(.white)
                     
+                    Text("High Score: \(highScore)")
+                        .font(.title3)
+                        .foregroundStyle(.green)
+                    
                     Text("Time: \(timeRemaining)")
                         .font(.title2)
                         .foregroundStyle(.white)
@@ -109,6 +116,10 @@ struct LightItUpView: View {
                 updateLevel()
             } else {
                 gameOver = true
+                
+                if score > highScore {
+                    highScore = score
+                }
             }
         }
         .onAppear {
@@ -179,6 +190,10 @@ struct LightItUpView: View {
             Text("Final Score: \(score)")
                 .font(.title2)
                 .foregroundStyle(.white)
+            
+            Text("High Score: \(highScore)")
+                .font(.title3)
+                .foregroundStyle(.green)
             
             Button("Play Again") {
                 restartGame()
