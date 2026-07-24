@@ -2,14 +2,13 @@ import SwiftUI
 import Combine
 
 struct LightItUpView: View {
-    @State private var activeCard = 0
+    @State private var activeCards: Set<Int> = [0]
     @State private var score = 0
     @State private var timeRemaining = 60
     @State private var gameOver = false
     @State private var level = 1
     @State private var cardTimerToken = UUID()
     @AppStorage("lightItUpHighScore")
-    
     private var highScore = 0
     
     let timer = Timer.publish(
@@ -19,16 +18,6 @@ struct LightItUpView: View {
     ).autoconnect()
     
     
-    private var gridSize: Int {
-        switch level {
-        case 1:
-            return 2
-        case 2:
-            return 3
-        default:
-            return 4
-        }
-    }
 
     private var cardCount: Int {
         switch level {
@@ -112,7 +101,7 @@ struct LightItUpView: View {
                             } label: {
                                 RoundedRectangle(cornerRadius: 15)
                                     .fill(
-                                        index == activeCard
+                                        activeCards.contains(index)
                                         ? Color.yellow
                                         : Color.gray
                                     )
@@ -143,26 +132,59 @@ struct LightItUpView: View {
             }
         }
         .onAppear {
+            generateActiveCards()
             startCardTimer()
         }
     }
     
     private func handleCardTap(_ index: Int) {
+
         guard !gameOver else {
             return
         }
-        if index == activeCard {
+
+        if activeCards.contains(index) {
+
             score += 1
-            activeCard = Int.random(in: 0..<cardCount)
+
+            generateActiveCards()
+
             startCardTimer()
+
         } else {
+
             score = max(0, score - 1)
+
         }
-        
+    }
+    
+    private func generateActiveCards() {
+
+        if level == 4 {
+
+            while true {
+
+                let first = Int.random(in: 0..<cardCount)
+                let second = Int.random(in: 0..<cardCount)
+
+                if first != second {
+
+                    activeCards = [first, second]
+                    break
+
+                }
+            }
+
+        } else {
+
+            activeCards = [Int.random(in: 0..<cardCount)]
+
+        }
+
     }
     
     private func startCardTimer() {
-        let currentCard = activeCard
+        let currentCards = activeCards
         let currentToken = UUID()
 
         cardTimerToken = currentToken
@@ -175,9 +197,9 @@ struct LightItUpView: View {
                 return
             }
 
-            if activeCard == currentCard {
+            if activeCards == currentCards {
                 score = max(0, score - 1)
-                activeCard = Int.random(in: 0..<cardCount)
+               generateActiveCards()
                 startCardTimer()
             }
         }
@@ -198,7 +220,7 @@ struct LightItUpView: View {
 
         if newLevel != level {
             level = newLevel
-            activeCard = Int.random(in: 0..<cardCount)
+            generateActiveCards()
             startCardTimer()
         }
     }
@@ -236,7 +258,7 @@ struct LightItUpView: View {
         timeRemaining = 60
         gameOver = false
         level = 1
-        activeCard = Int.random(in: 0..<cardCount)
+        generateActiveCards()
         startCardTimer()
     }
 
