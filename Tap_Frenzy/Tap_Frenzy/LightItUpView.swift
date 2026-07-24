@@ -4,7 +4,7 @@ import Combine
 struct LightItUpView: View {
     @State private var activeCard = 0
     @State private var score = 0
-    @State private var timeRemaining = 30
+    @State private var timeRemaining = 60
     @State private var gameOver = false
     @State private var level = 1
     @State private var cardTimerToken = UUID()
@@ -31,14 +31,32 @@ struct LightItUpView: View {
     }
 
     private var cardCount: Int {
-        gridSize * gridSize
+        switch level {
+        case 1:
+            return 3
+        case 2:
+            return 4
+        case 3:
+            return 6
+        default:
+            return 9
+        }
     }
 
     private var columns: [GridItem] {
-        Array(
-            repeating: GridItem(.flexible()),
-            count: gridSize
-        )
+        switch level {
+        case 1:
+            return Array(repeating: GridItem(.flexible()), count: 3)
+
+        case 2:
+            return Array(repeating: GridItem(.flexible()), count: 2)
+
+        case 3:
+            return Array(repeating: GridItem(.flexible()), count: 3)
+
+        default:
+            return Array(repeating: GridItem(.flexible()), count: 3)
+        }
     }
 
     private var lightDuration: Double {
@@ -46,9 +64,11 @@ struct LightItUpView: View {
         case 1:
             return 1.5
         case 2:
+            return 1.2
+        case 3:
             return 1.0
         default:
-            return 0.7
+            return 0.8
         }
     }
     
@@ -162,15 +182,18 @@ struct LightItUpView: View {
             }
         }
     }
+    
     private func updateLevel() {
         let newLevel: Int
 
-        if timeRemaining > 20 {
+        if timeRemaining > 45 {
             newLevel = 1
-        } else if timeRemaining > 10 {
+        } else if timeRemaining > 30 {
             newLevel = 2
-        } else {
+        } else if timeRemaining > 15 {
             newLevel = 3
+        } else {
+            newLevel = 4
         }
 
         if newLevel != level {
@@ -179,6 +202,7 @@ struct LightItUpView: View {
             startCardTimer()
         }
     }
+    
     private var gameOverView: some View {
         VStack(spacing: 25) {
             
@@ -209,7 +233,7 @@ struct LightItUpView: View {
     
     private func restartGame() {
         score = 0
-        timeRemaining = 30
+        timeRemaining = 60
         gameOver = false
         level = 1
         activeCard = Int.random(in: 0..<cardCount)
