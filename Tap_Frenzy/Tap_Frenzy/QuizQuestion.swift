@@ -11,7 +11,7 @@ struct QuizQuestion: Codable, Identifiable {
         case correctAnswer = "correct_answer"
         case incorrectAnswers = "incorrect_answers"
     }
-
+    
     var allAnswers: [String] {
         (incorrectAnswers + [correctAnswer]).shuffled()
     }

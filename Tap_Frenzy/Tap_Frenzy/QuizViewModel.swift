@@ -58,17 +58,19 @@ final class QuizViewModel: ObservableObject {
         guard let question = currentQuestion else {
             return
         }
-
+        
         if answer == question.correctAnswer {
             streak += 1
-            score += 10 + streak
+            
+            let streakBonus = max(0, streak - 1) * 2
+            score += 10 + streakBonus
         } else {
             streak = 0
             score = max(0, score - 2)
         }
-
-        moveToNextQuestion()
-    }
+            moveToNextQuestion()
+        }
+    
 
     private func moveToNextQuestion() {
         if currentIndex < questions.count - 1 {

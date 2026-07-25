@@ -60,6 +60,17 @@ struct HomeView: View {
                             color: .yellow
                         )
                     }
+                    
+                    NavigationLink {
+                        QuizRushView()
+                    } label: {
+                        GameCard(
+                            icon: "questionmark.circle.fill",
+                            title: "Quiz Rush",
+                            subtitle: "Test your trivia knowledge",
+                            color: .orange
+                        )
+                    }
 
                     Spacer()
 
