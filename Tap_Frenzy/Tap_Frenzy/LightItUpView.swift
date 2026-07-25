@@ -1,8 +1,13 @@
 import SwiftUI
 import Combine
 
+struct Card: Identifiable, Equatable {
+    let id: Int
+    var isLit: Bool
+}
+
 struct LightItUpView: View {
-    @State private var activeCards: Set<Int> = [0]
+    @State private var cards: [Card] = []
     @State private var score = 0
     @State private var timeRemaining = 60
     @State private var gameOver = false
@@ -94,18 +99,25 @@ struct LightItUpView: View {
                     
                     LazyVGrid(columns: columns, spacing: 15) {
                         
-                        ForEach(0..<cardCount, id: \.self) { index in
-                            
+                        ForEach(cards) { card in
+
                             Button {
-                                handleCardTap(index)
+                                handleCardTap(card.id)
                             } label: {
                                 RoundedRectangle(cornerRadius: 15)
                                     .fill(
-                                        activeCards.contains(index)
+                                        card.isLit
                                         ? Color.yellow
                                         : Color.gray
                                     )
                                     .frame(height: 100)
+                                    .scaleEffect(
+                                        card.isLit ? 1.08 : 1.0
+                                    )
+                                    .animation(
+                                        .easeInOut(duration: 0.2),
+                                        value: cards
+                                    )
                             }
                             .buttonStyle(.plain)
                         }
@@ -137,54 +149,59 @@ struct LightItUpView: View {
         }
     }
     
-    private func handleCardTap(_ index: Int) {
-
+    private func handleCardTap(_ cardID: Int) {
         guard !gameOver else {
             return
         }
 
-        if activeCards.contains(index) {
+        let wasCorrectTap =
+            cards.first(where: { $0.id == cardID })?.isLit == true
 
-            score += 1
+        withAnimation(.easeInOut(duration: 0.2)) {
+            if wasCorrectTap {
+                score += 1
+                generateActiveCards()
+            } else {
+                score = max(0, score - 1)
+            }
+        }
 
-            generateActiveCards()
-
+        if wasCorrectTap {
             startCardTimer()
-
-        } else {
-
-            score = max(0, score - 1)
-
         }
     }
     
     private func generateActiveCards() {
+        var litCardIDs: Set<Int> = []
 
         if level == 4 {
-
-            while true {
-
-                let first = Int.random(in: 0..<cardCount)
-                let second = Int.random(in: 0..<cardCount)
-
-                if first != second {
-
-                    activeCards = [first, second]
-                    break
-
-                }
+            while litCardIDs.count < 2 {
+                let randomID = Int.random(in: 0..<cardCount)
+                litCardIDs.insert(randomID)
             }
-
         } else {
-
-            activeCards = [Int.random(in: 0..<cardCount)]
-
+            let randomID = Int.random(in: 0..<cardCount)
+            litCardIDs.insert(randomID)
         }
 
+        cards = (0..<cardCount).map { index in
+            Card(
+                id: index,
+                isLit: litCardIDs.contains(index)
+            )
+        }
+    }
+    
+    private var currentLitCardIDs: Set<Int> {
+        Set(
+            cards
+                .filter { $0.isLit }
+                .map { $0.id }
+        )
     }
     
     private func startCardTimer() {
-        let currentCards = activeCards
+        let previousLitCardIDs = currentLitCardIDs
         let currentToken = UUID()
 
         cardTimerToken = currentToken
@@ -197,9 +214,12 @@ struct LightItUpView: View {
                 return
             }
 
-            if activeCards == currentCards {
-                score = max(0, score - 1)
-               generateActiveCards()
+            if currentLitCardIDs == previousLitCardIDs {
+                withAnimation(.easeInOut(duration: 0.2)) {
+                    score = max(0, score - 1)
+                    generateActiveCards()
+                }
+
                 startCardTimer()
             }
         }
@@ -219,8 +239,11 @@ struct LightItUpView: View {
         }
 
         if newLevel != level {
-            level = newLevel
-            generateActiveCards()
+            withAnimation(.easeInOut(duration: 0.3)) {
+                level = newLevel
+                generateActiveCards()
+            }
+
             startCardTimer()
         }
     }
