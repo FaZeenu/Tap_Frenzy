@@ -20,6 +20,7 @@ struct LightItUpView: View {
     @State private var gameOver = false
     @State private var level: GameLevel = .level1
     @State private var cardTimerToken = UUID()
+    @State private var hasSavedSession = false
     @AppStorage("lightItUpHighScore")
     private var highScore = 0
     
@@ -169,16 +170,35 @@ struct LightItUpView: View {
                 updateLevel()
             } else {
                 gameOver = true
-                
+
                 if score > highScore {
                     highScore = score
                 }
+
+                saveGameSession()
             }
         }
         .onAppear {
             generateActiveCards()
             startCardTimer()
         }
+    }
+    
+    private func saveGameSession() {
+        guard hasSavedSession == false else {
+            return
+        }
+
+        let session = GameSession(
+            mode: .lightItUp,
+            score: score,
+            timestamp: Date(),
+            latitude: 0.0,
+            longitude: 0.0
+        )
+
+        GameSessionStore.shared.save(session)
+        hasSavedSession = true
     }
     
     private func handleCardTap(_ cardID: Int) {
@@ -313,10 +333,10 @@ struct LightItUpView: View {
         timeRemaining = 60
         gameOver = false
         level = .level1
+        hasSavedSession = false
         generateActiveCards()
         startCardTimer()
     }
-
 }
 
 #Preview {
