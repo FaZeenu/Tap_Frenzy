@@ -6,12 +6,19 @@ struct Card: Identifiable, Equatable {
     var isLit: Bool
 }
 
+enum GameLevel {
+    case level1
+    case level2
+    case level3
+    case level4
+}
+
 struct LightItUpView: View {
     @State private var cards: [Card] = []
     @State private var score = 0
     @State private var timeRemaining = 60
     @State private var gameOver = false
-    @State private var level = 1
+    @State private var level: GameLevel = .level1
     @State private var cardTimerToken = UUID()
     @AppStorage("lightItUpHighScore")
     private var highScore = 0
@@ -26,43 +33,68 @@ struct LightItUpView: View {
 
     private var cardCount: Int {
         switch level {
-        case 1:
+        case .level1:
             return 3
-        case 2:
+        case .level2:
             return 4
-        case 3:
+        case .level3:
             return 6
-        default:
+        case .level4:
             return 9
         }
     }
 
     private var columns: [GridItem] {
         switch level {
-        case 1:
-            return Array(repeating: GridItem(.flexible()), count: 3)
+        case .level1:
+            return Array(
+                repeating: GridItem(.flexible()),
+                count: 3
+            )
 
-        case 2:
-            return Array(repeating: GridItem(.flexible()), count: 2)
+        case .level2:
+            return Array(
+                repeating: GridItem(.flexible()),
+                count: 2
+            )
 
-        case 3:
-            return Array(repeating: GridItem(.flexible()), count: 3)
+        case .level3:
+            return Array(
+                repeating: GridItem(.flexible()),
+                count: 3
+            )
 
-        default:
-            return Array(repeating: GridItem(.flexible()), count: 3)
+        case .level4:
+            return Array(
+                repeating: GridItem(.flexible()),
+                count: 3
+            )
         }
     }
 
     private var lightDuration: Double {
         switch level {
-        case 1:
+        case .level1:
             return 1.5
-        case 2:
+        case .level2:
             return 1.2
-        case 3:
+        case .level3:
             return 1.0
-        default:
+        case .level4:
             return 0.8
+        }
+    }
+    
+    private var levelNumber: Int {
+        switch level {
+        case .level1:
+            return 1
+        case .level2:
+            return 2
+        case .level3:
+            return 3
+        case .level4:
+            return 4
         }
     }
     
@@ -93,7 +125,7 @@ struct LightItUpView: View {
                         .font(.title2)
                         .foregroundStyle(.white)
                     
-                    Text("Level: \(level)")
+                    Text("Level: \(levelNumber)")
                         .font(.title2)
                         .foregroundStyle(.yellow)
                     
@@ -174,7 +206,7 @@ struct LightItUpView: View {
     private func generateActiveCards() {
         var litCardIDs: Set<Int> = []
 
-        if level == 4 {
+        if level == .level4 {
             while litCardIDs.count < 2 {
                 let randomID = Int.random(in: 0..<cardCount)
                 litCardIDs.insert(randomID)
@@ -226,16 +258,16 @@ struct LightItUpView: View {
     }
     
     private func updateLevel() {
-        let newLevel: Int
+        let newLevel: GameLevel
 
         if timeRemaining > 45 {
-            newLevel = 1
+            newLevel = .level1
         } else if timeRemaining > 30 {
-            newLevel = 2
+            newLevel = .level2
         } else if timeRemaining > 15 {
-            newLevel = 3
+            newLevel = .level3
         } else {
-            newLevel = 4
+            newLevel = .level4
         }
 
         if newLevel != level {
@@ -280,7 +312,7 @@ struct LightItUpView: View {
         score = 0
         timeRemaining = 60
         gameOver = false
-        level = 1
+        level = .level1
         generateActiveCards()
         startCardTimer()
     }
