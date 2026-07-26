@@ -2,6 +2,7 @@ import SwiftUI
 
 struct QuizRushView: View {
     @StateObject private var viewModel = QuizViewModel()
+    @State private var hasSavedSession = false
 
     var body: some View {
         ZStack {
@@ -22,13 +23,36 @@ struct QuizRushView: View {
                 resultsView
             }
         }
-        .task {
-            if viewModel.questions.isEmpty {
-                await viewModel.loadQuestions()
-            }
+        
+    .task {
+        if viewModel.questions.isEmpty {
+            await viewModel.loadQuestions()
         }
     }
+    .onChange(of: viewModel.viewState) { _, newState in
+        if newState == .finished {
+            saveGameSession()
+        }
+     }
+    }
 
+    private func saveGameSession() {
+        guard hasSavedSession == false else {
+            return
+        }
+
+        let session = GameSession(
+            mode: .quizRush,
+            score: viewModel.score,
+            timestamp: Date(),
+            latitude: 0.0,
+            longitude: 0.0
+        )
+
+        GameSessionStore.shared.save(session)
+        hasSavedSession = true
+    }
+    
     private var loadingView: some View {
         VStack(spacing: 20) {
             ProgressView()
@@ -149,10 +173,13 @@ struct QuizRushView: View {
                 .foregroundStyle(.white)
 
             Button("Play Again") {
+                hasSavedSession = false
+
                 Task {
                     await viewModel.restartQuiz()
                 }
             }
+            
             .font(.title2)
             .fontWeight(.bold)
             .foregroundStyle(.orange)
