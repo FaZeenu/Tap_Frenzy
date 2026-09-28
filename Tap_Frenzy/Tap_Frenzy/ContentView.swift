@@ -6,6 +6,7 @@ struct ContentView: View {
     @State private var timeRemaining = 10
     @State private var highScore = 0
     @State private var isBonusColour = true
+    @State private var hasSavedSession = false
     
     let timer = Timer.publish(
         every: 1,
@@ -15,6 +16,23 @@ struct ContentView: View {
     
     var buttonSize: CGFloat {
         CGFloat(120 + timeRemaining * 10)
+    }
+    
+    private func saveGameSession() {
+        guard hasSavedSession == false else {
+            return
+        }
+
+        let session = GameSession(
+            mode: .tapFrenzy,
+            score: score,
+            timestamp: Date(),
+            latitude: 0.0,
+            longitude: 0.0
+        )
+
+        GameSessionStore.shared.save(session)
+        hasSavedSession = true
     }
     
     var body: some View {
@@ -73,6 +91,14 @@ struct ContentView: View {
                         timeRemaining = 10
                         isBonusColour = true
                     }
+                    
+                    Button("Play Again") {
+                        score = 0
+                        timeRemaining = 10
+                        isBonusColour = true
+                        hasSavedSession = false
+                    }
+                    
                     .font(.title2)
                     .fontWeight(.bold)
                     .foregroundStyle(.blue)
@@ -83,14 +109,20 @@ struct ContentView: View {
             }
             .padding()
         }
+        
         .onReceive(timer) { _ in
             if timeRemaining > 0 {
                 timeRemaining -= 1
                 isBonusColour.toggle()
             }
-            if timeRemaining == 0 && score > highScore {
+
+            if timeRemaining == 0 {
+                if score > highScore {
                     highScore = score
                 }
+
+                saveGameSession()
+            }
         }
     }
 }
